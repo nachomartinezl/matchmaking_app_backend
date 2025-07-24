@@ -6,3 +6,5 @@ sqlalchemy
 psycopg2-binary
 numpy
 python-dotenv
+fastapi[all]
+pytest
