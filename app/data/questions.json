@@ -1,0 +1,659 @@
+{
+  "personality": {
+    "mbti": [
+      {
+        "question": "At a party do you:",
+        "options": [
+          "Interact with many, including strangers",
+          "Interact with a few, known to you"
+        ]
+      },
+      {
+        "question": "Are you more:",
+        "options": [
+          "Realistic than speculative",
+          "Speculative than realistic"
+        ]
+      },
+      {
+        "question": "Is it worse to:",
+        "options": [
+          "Have your \"head in the clouds\"",
+          "Be \"in a rut\""
+        ]
+      },
+      {
+        "question": "Are you more impressed by:",
+        "options": [
+          "Principles",
+          "Emotions"
+        ]
+      },
+      {
+        "question": "Are more drawn toward the:",
+        "options": [
+          "Convincing",
+          "Touching"
+        ]
+      },
+      {
+        "question": "Do you prefer to work:",
+        "options": [
+          "To deadlines",
+          "Just \"whenever\""
+        ]
+      },
+      {
+        "question": "Do you tend to choose:",
+        "options": [
+          "Rather carefully",
+          "Somewhat impulsively"
+        ]
+      },
+      {
+        "question": "At parties do you:",
+        "options": [
+          "Stay late, with increasing energy",
+          "Leave early with decreased energy"
+        ]
+      },
+      {
+        "question": "Are you more attracted to:",
+        "options": [
+          "Sensible people",
+          "Imaginative people"
+        ]
+      },
+      {
+        "question": "Are you more interested in:",
+        "options": [
+          "What is actual",
+          "What is possible"
+        ]
+      },
+      {
+        "question": "In judging others are you more swayed by:",
+        "options": [
+          "Laws than circumstances",
+          "Circumstances than laws"
+        ]
+      },
+      {
+        "question": "In approaching others is your inclination to be somewhat:",
+        "options": [
+          "Objective",
+          "Personal"
+        ]
+      },
+      {
+        "question": "Are you more:",
+        "options": [
+          "Punctual",
+          "Leisurely"
+        ]
+      },
+      {
+        "question": "Does it bother you more having things:",
+        "options": [
+          "Incomplete",
+          "Completed"
+        ]
+      },
+      {
+        "question": "In your social groups do you:",
+        "options": [
+          "Keep abreast of other's happenings",
+          "Get behind on the news"
+        ]
+      },
+      {
+        "question": "In doing ordinary things are you more likely to:",
+        "options": [
+          "Do it the usual way",
+          "Do it your own way"
+        ]
+      },
+      {
+        "question": "Writers should:",
+        "options": [
+          "\"Say what they mean and mean what they say\"",
+          "Express things more by use of analogy"
+        ]
+      },
+      {
+        "question": "Which appeals to you more:",
+        "options": [
+          "Consistency of thought",
+          "Harmonious human relationships"
+        ]
+      },
+      {
+        "question": "Are you more comfortable in making:",
+        "options": [
+          "Logical judgments",
+          "Value judgments"
+        ]
+      },
+      {
+        "question": "Do you want things:",
+        "options": [
+          "Settled and decided",
+          "Unsettled and undecided"
+        ]
+      },
+      {
+        "question": "Would you say you are more:",
+        "options": [
+          "Serious and determined",
+          "Easy-going"
+        ]
+      },
+      {
+        "question": "In phoning do you:",
+        "options": [
+          "Rarely question that it will all be said",
+          "Rehearse what you'll say"
+        ]
+      },
+      {
+        "question": "Facts:",
+        "options": [
+          "\"Speak for themselves\"",
+          "Illustrate principles"
+        ]
+      },
+      {
+        "question": "Are visionaries:",
+        "options": [
+          "somewhat annoying",
+          "rather fascinating"
+        ]
+      },
+      {
+        "question": "Are you more often:",
+        "options": [
+          "a cool-headed person",
+          "a warm-hearted person"
+        ]
+      },
+      {
+        "question": "Is it worse to be:",
+        "options": [
+          "unjust",
+          "merciless"
+        ]
+      },
+      {
+        "question": "Should one usually let events occur:",
+        "options": [
+          "by careful selection and choice",
+          "randomly and by chance"
+        ]
+      },
+      {
+        "question": "Do you feel better about:",
+        "options": [
+          "having purchased",
+          "having the option to buy"
+        ]
+      },
+      {
+        "question": "In company do you:",
+        "options": [
+          "initiate conversation",
+          "wait to be approached"
+        ]
+      },
+      {
+        "question": "Common sense is:",
+        "options": [
+          "rarely questionable",
+          "frequently questionable"
+        ]
+      },
+      {
+        "question": "Children often do not:",
+        "options": [
+          "make themselves useful enough",
+          "exercise their fantasy enough"
+        ]
+      },
+      {
+        "question": "In making decisions do you feel more comfortable with:",
+        "options": [
+          "standards",
+          "feelings"
+        ]
+      },
+      {
+        "question": "Are you more:",
+        "options": [
+          "firm than gentle",
+          "gentle than firm"
+        ]
+      },
+      {
+        "question": "Which is more admirable:",
+        "options": [
+          "the ability to organize and be methodical",
+          "the ability to adapt and make do"
+        ]
+      },
+      {
+        "question": "Do you put more value on:",
+        "options": [
+          "infinite",
+          "open-minded"
+        ]
+      },
+      {
+        "question": "Does new and non-routine interaction with others:",
+        "options": [
+          "stimulate and energize you",
+          "tax your reserves"
+        ]
+      },
+      {
+        "question": "Are you more frequently:",
+        "options": [
+          "a practical sort of person",
+          "a fanciful sort of person"
+        ]
+      },
+      {
+        "question": "Are you more likely to:",
+        "options": [
+          "see how others are useful",
+          "see how others see"
+        ]
+      },
+      {
+        "question": "Which is more satisfying:",
+        "options": [
+          "to discuss an issue thoroughly",
+          "to arrive at agreement on an issue"
+        ]
+      },
+      {
+        "question": "Which rules you more:",
+        "options": [
+          "your head",
+          "your heart"
+        ]
+      },
+      {
+        "question": "Are you more comfortable with work that is:",
+        "options": [
+          "contracted",
+          "done on a casual basis"
+        ]
+      },
+      {
+        "question": "Do you tend to look for:",
+        "options": [
+          "the orderly",
+          "whatever turns up"
+        ]
+      },
+      {
+        "question": "Do you prefer:",
+        "options": [
+          "many friends with brief contact",
+          "a few friends with more lengthy contact"
+        ]
+      },
+      {
+        "question": "Do you go more by:",
+        "options": [
+          "facts",
+          "principles"
+        ]
+      },
+      {
+        "question": "Are you more interested in:",
+        "options": [
+          "production and distribution",
+          "design and research"
+        ]
+      },
+      {
+        "question": "Which is more of a compliment:",
+        "options": [
+          "\"There is a very logical person.\"",
+          "\"There is a very sentimental person.\""
+        ]
+      },
+      {
+        "question": "Do you value in yourself more that you are:",
+        "options": [
+          "unwavering",
+          "devoted"
+        ]
+      },
+      {
+        "question": "Do you more often prefer the",
+        "options": [
+          "final and unalterable statement",
+          "tentative and preliminary statement"
+        ]
+      },
+      {
+        "question": "Are you more comfortable:",
+        "options": [
+          "after a decision",
+          "before a decision"
+        ]
+      },
+      {
+        "question": "Do you:",
+        "options": [
+          "speak easily and at length with strangers",
+          "find little to say to strangers"
+        ]
+      },
+      {
+        "question": "Are you more likely to trust your:",
+        "options": [
+          "experience",
+          "hunch"
+        ]
+      },
+      {
+        "question": "Do you feel:",
+        "options": [
+          "more practical than ingenious",
+          "more ingenious than practical"
+        ]
+      },
+      {
+        "question": "Which person is more to be complimented - one of:",
+        "options": [
+          "clear reason",
+          "strong feeling"
+        ]
+      },
+      {
+        "question": "Are you inclined more to be:",
+        "options": [
+          "fair-minded",
+          "sympathetic"
+        ]
+      },
+      {
+        "question": "Is it preferable mostly to:",
+        "options": [
+          "make sure things are arranged",
+          "just let things happen"
+        ]
+      },
+      {
+        "question": "In relationships should most things be:",
+        "options": [
+          "re-negotiable",
+          "random and circumstantial"
+        ]
+      },
+      {
+        "question": "When the phone rings do you:",
+        "options": [
+          "hasten to get to it first",
+          "hope someone else will answer"
+        ]
+      },
+      {
+        "question": "Do you prize more in yourself:",
+        "options": [
+          "a strong sense of reality",
+          "a vivid imagination"
+        ]
+      },
+      {
+        "question": "Are you drawn more to:",
+        "options": [
+          "fundamentals",
+          "overtones"
+        ]
+      },
+      {
+        "question": "Which seems the greater error:",
+        "options": [
+          "to be too passionate",
+          "to be too objective"
+        ]
+      },
+      {
+        "question": "Do you see yourself as basically:",
+        "options": [
+          "hard-headed",
+          "soft-hearted"
+        ]
+      },
+      {
+        "question": "Which situation appeals to you more:",
+        "options": [
+          "the structured and scheduled",
+          "the unstructured and unscheduled"
+        ]
+      },
+      {
+        "question": "Are you a person that is more:",
+        "options": [
+          "routinized than whimsical",
+          "whimsical than routinized"
+        ]
+      },
+      {
+        "question": "Are you more inclined to be:",
+        "options": [
+          "easy to approach",
+          "somewhat reserved"
+        ]
+      },
+      {
+        "question": "In writings do you prefer:",
+        "options": [
+          "the more literal",
+          "the more figurative"
+        ]
+      },
+      {
+        "question": "Is it harder for you to:",
+        "options": [
+          "identify with others",
+          "utilize others"
+        ]
+      },
+      {
+        "question": "Which do you wish more for yourself:",
+        "options": [
+          "clarity of reason",
+          "strength of compassion"
+        ]
+      },
+      {
+        "question": "Which is the greater fault:",
+        "options": [
+          "being indiscriminate",
+          "being critical"
+        ]
+      },
+      {
+        "question": "Do you prefer the:",
+        "options": [
+          "planned event",
+          "unplanned event"
+        ]
+      },
+      {
+        "question": "Do you tend to be more:",
+        "options": [
+          "deliberate than spontaneous",
+          "spontaneous than deliberate"
+        ]
+      }
+    ]
+  },
+  "values": {
+    "schwartz_survey": {
+      "scale": {
+        "options": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "labels": {
+          "0": "Opposed to my principles",
+          "1": "Not important",
+          "4": "Important",
+          "8": "Of supreme importance"
+        }
+      },
+      "questions": [
+        "POWER (social power, authority, wealth)",
+        "ACHIEVEMENT (success, capability, ambition, influence on people and events)",
+        "HEDONISM (gratification of desires, enjoyment in life, self-indulgence)",
+        "STIMULATION (daring, a varied and challenging life, an exciting life)",
+        "SELF-DIRECTION (creativity, freedom, curiosity, independence, choosing one's own goals)",
+        "UNIVERSALISM (broad-mindedness, beauty of nature and arts, social justice, a world at peace, equality, wisdom, unity with nature, environmental protection)",
+        "BENEVOLENCE (helpfulness, honesty, forgiveness, loyalty, responsibility)",
+        "TRADITION (respect for tradition, humbleness, accepting one's portion in life, devotion, modesty)",
+        "CONFORMITY (obedience, honoring parents and elders, self-discipline, politeness)",
+        "SECURITY (national security, family security, social order, cleanliness, reciprocation of favors)"
+      ]
+    }
+  },
+  "emotional": {
+    "attachment_styles": {
+      "scale": {
+        "options": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "labels": {
+          "1": "Strongly Disagree",
+          "2": "Disagree",
+          "3": "Somewhat Disagree",
+          "4": "Neutral",
+          "5": "Somewhat Agree",
+          "6": "Agree",
+          "7": "Strongly Agree"
+        }
+      },
+      "questions": [
+        "I find it easy to get close to others and am comfortable depending on them.",
+        "I am comfortable expressing my feelings and needs in my relationships.",
+        "I believe that most people are trustworthy and have good intentions.",
+        "I am confident that my partner will be there for me when I need them.",
+        "I feel comfortable being alone, but also enjoy spending time with others.",
+        "I worry that my partner doesn't really love me or won't stay with me.",
+        "I need a lot of reassurance and affection from my partner to feel secure in the relationship.",
+        "I often feel jealous or possessive of my partner.",
+        "I tend to overthink and obsess about my relationships.",
+        "I am afraid of being alone and often feel lonely, even when in a relationship.",
+        "I prefer to keep my distance in my relationships and value my independence.",
+        "I am uncomfortable expressing my feelings and needs in my relationships.",
+        "I tend to downplay the importance of romantic relationships in my life.",
+        "I find it difficult to trust others or depend on them for support.",
+        "I often feel that my partner is too needy or clingy.",
+        "I am often torn between the desire to be close to others and the fear of getting hurt or rejected.",
+        "I have had some traumatic experiences in my past relationships that make it hard for me to trust others.",
+        "I tend to push people away or sabotage my relationships when I start to feel too vulnerable or close.",
+        "I struggle with feelings of inadequacy and often worry that I am not worthy of love.",
+        "I have a hard time feeling safe or secure in my relationships, even when my partner is loving and supportive."
+      ]
+    }
+  },
+  "character": {
+    "hexaco": {
+      "scale": {
+        "options": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "labels": {
+          "1": "strongly disagree",
+          "2": "disagree",
+          "3": "neutral",
+          "4": "agree",
+          "5": "strongly agree"
+        }
+      },
+      "questions": [
+        "I would be quite bored by a visit to an art gallery.",
+        "I plan ahead and organize things, to avoid scrambling at the last minute.",
+        "I rarely hold a grudge, even against people who have badly wronged me.",
+        "I feel reasonably satisfied with myself overall.",
+        "I would feel afraid if I had to travel in bad weather conditions.",
+        "I wouldn't use flattery to get a raise or promotion at work, even if I thought it would succeed.",
+        "I'm interested in learning about the history and politics of other countries.",
+        "I often push myself very hard when trying to achieve a goal.",
+        "People sometimes tell me that I am too critical of others.",
+        "I rarely express my opinions in group meetings.",
+        "I sometimes can't help worrying about little things.",
+        "If I knew that I could never get caught, I would be willing to steal a million dollars.",
+        "I would enjoy creating a work of art, such as a novel, a song, or a painting.",
+        "When working on something, I don't pay much attention to small details.",
+        "People sometimes tell me that I'm too stubborn.",
+        "I prefer jobs that involve active social interaction to those that involve working alone.",
+        "When I suffer from a painful experience, I need someone to make me feel comfortable.",
+        "Having a lot of money is not especially important to me.",
+        "I think that paying attention to radical ideas is a waste of time.",
+        "I make decisions based on the feeling of the moment rather than on careful thought.",
+        "People think of me as someone who has a quick temper.",
+        "On most days, I feel cheerful and optimistic.",
+        "I feel like crying when I see other people crying.",
+        "I think that I am entitled to more respect than the average person is.",
+        "If I had the opportunity, I would like to attend a classical music concert.",
+        "When working, I sometimes have difficulties due to being disorganized.",
+        "My attitude toward people who have treated me badly is \"forgive and forget”.",
+        "I feel that I am an unpopular person.",
+        "When it comes to physical danger, I am very fearful.",
+        "If I want something from someone, I will laugh at that person's worst jokes.",
+        "I've never really enjoyed looking through an encyclopedia.",
+        "I do only the minimum amount of work needed to get by.",
+        "I tend to be lenient in judging other people.",
+        "In social situations, I'm usually the one who makes the first move.",
+        "I worry a lot less than most people do.",
+        "I would never accept a bribe, even if it were very large.",
+        "People have often told me that I have a good imagination.",
+        "I always try to be accurate in my work, even at the expense of time.",
+        "I am usually quite flexible in my opinions when people disagree with me.",
+        "The first thing that I always do in a new place is to make friends.",
+        "I can handle difficult situations without needing emotional support from anyone else.",
+        "I would get a lot of pleasure from owning expensive luxury goods.",
+        "I like people who have unconventional views.",
+        "I make a lot of mistakes because I don't think before I act.",
+        "Most people tend to get angry more quickly than I do.",
+        "Most people are more upbeat and dynamic than I generally am.",
+        "I feel strong emotions when someone close to me is going away for a long time.",
+        "I want people to know that I am an important person of high status.",
+        "I don't think of myself as the artistic or creative type.",
+        "People often call me a perfectionist.",
+        "Even when people make a lot of mistakes, I rarely say anything negative.",
+        "I sometimes feel that I am a worthless person.",
+        "Even in an emergency I wouldn't feel like panicking.",
+        "I wouldn't pretend to like someone just to get that person to do favors for me.",
+        "I find it boring to discuss philosophy.",
+        "I prefer to do whatever comes to mind, rather than stick to a plan.",
+        "When people tell me that I'm wrong, my first reaction is to argue with them.",
+        "When I'm in a group of people, I'm often the one who speaks on behalf of the group.",
+        "I remain unemotional even in situations where most people get very sentimental.",
+        "I'd be tempted to use counterfeit money, if I were sure I could get away with it."
+      ]
+    }
+  }
+}
