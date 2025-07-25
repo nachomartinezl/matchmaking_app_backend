@@ -178,7 +178,7 @@ def calculate_scores_from_submission(submission: QuestionnaireSubmit) -> dict:
     Dispatcher function that calls the correct scoring algorithm
     based on the questionnaire name.
     """
-    name = submission.questionnaire_name
+    name = submission.questionnaire
     responses = submission.responses
 
     if name == 'hexaco':
