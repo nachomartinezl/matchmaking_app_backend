@@ -88,22 +88,22 @@ class ProfileUpdate(BaseModel):
     Model for creating or updating a profile. All fields are optional
     to allow for partial updates as the user moves through signup steps.
     """
-    first_name: Optional[str]
-    last_name: Optional[str]
-    dob: Optional[date]
-    gender: Optional[UserGender]
-    country: Optional[str]
-    preference: Optional[InterestPreference]
-    height_cm: Optional[int]
-    religion: Optional[ReligionType]
-    pets: Optional[PetsPreference]
-    smoking: Optional[SmokingHabit]
-    drinking: Optional[DrinkingHabit]
-    kids: Optional[KidsStatus]
-    marital_status: Optional[MaritalStatusType]
-    goal: Optional[RelationshipGoal]
-    description: Optional[str]
-    profile_picture_url: Optional[str]
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    dob: Optional[date] = None
+    gender: Optional[UserGender] = None
+    country: Optional[str] = None
+    preference: Optional[InterestPreference] = None
+    height_cm: Optional[int] = None
+    religion: Optional[ReligionType] = None
+    pets: Optional[PetsPreference] = None
+    smoking: Optional[SmokingHabit] = None
+    drinking: Optional[DrinkingHabit] = None
+    kids: Optional[KidsStatus] = None
+    marital_status: Optional[MaritalStatusType] = None
+    goal: Optional[RelationshipGoal] = None
+    description: Optional[str] = None
+    profile_picture_url: Optional[str] = None
 
 class ProfileOut(BaseModel):
     """
@@ -128,6 +128,7 @@ class ProfileOut(BaseModel):
     description: Optional[str]
     profile_picture_url: Optional[str]
     embedding: Optional[List[float]] = None
+    test_scores: Optional[dict] = None
     created_at: datetime  # Changed from date to datetime
     updated_at: datetime  # Changed from date to datetime
 
@@ -155,7 +156,7 @@ class OptionOut(BaseModel):
     position: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class QuestionOut(BaseModel):
     id: UUID
@@ -164,7 +165,7 @@ class QuestionOut(BaseModel):
     options: List[OptionOut]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class QuestionnaireOut(BaseModel):
     id: UUID
@@ -173,4 +174,4 @@ class QuestionnaireOut(BaseModel):
     questions: List[QuestionOut]
 
     class Config:
-        orm_mode = True
+        from_attributes = True

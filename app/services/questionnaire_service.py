@@ -35,21 +35,21 @@ async def submit_questionnaire_responses(submission: QuestionnaireSubmit):
     # 1. Save raw answers for auditing purposes
     raw_response_insert = {
         "user_id": str(submission.user_id),
-        "questionnaire": submission.questionnaire_name,
+        "questionnaire": submission.questionnaire,
         "responses": submission.responses
     }
     supabase.table("questionnaire_responses").insert(raw_response_insert).execute()
-    print(f"Raw responses saved for user {submission.user_id} for questionnaire '{submission.questionnaire_name}'.")
+    print(f"Raw responses saved for user {submission.user_id} for questionnaire '{submission.questionnaire}'.")
 
     # 2. Calculate the structured scores using the dedicated scoring service
     try:
         calculated_scores = calculate_scores_from_submission(submission)
         if not calculated_scores:
-            return {"success": False, "message": f"No scoring logic implemented for '{submission.questionnaire_name}'."}
+            return {"success": False, "message": f"No scoring logic implemented for '{submission.questionnaire}'."}
     except Exception as e:
         return {"success": False, "message": f"An error occurred during scoring: {e}"}
     
-    print(f"Calculated scores for '{submission.questionnaire_name}': {calculated_scores}")
+    print(f"Calculated scores for '{submission.questionnaire}': {calculated_scores}")
     
     # 3. Hand off to the profile service to save scores and rebuild the master embedding
     result = await update_test_scores_and_rebuild_embedding(submission.user_id, calculated_scores)

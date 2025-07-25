@@ -42,4 +42,4 @@ async def submit_answers(submission: QuestionnaireSubmit):
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("message", "An unknown error occurred."))
         
-    return {"message": result.get("message")}
+    return result

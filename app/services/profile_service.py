@@ -61,7 +61,9 @@ async def upsert_profile_and_rebuild_embedding(user_id: UUID, profile_update_dat
         print(f"CRITICAL: Failed to save rebuilt embedding for user {user_id}")
 
     print(f"Embedding for {user_id} has been rebuilt and saved.")
-    return embedding_response.data[0]
+
+    # Return the complete, updated profile
+    return {"success": True, "data": await get_full_profile(user_id)}
 
 async def update_test_scores_and_rebuild_embedding(user_id: UUID, new_scores: dict):
     """
@@ -94,7 +96,7 @@ async def update_test_scores_and_rebuild_embedding(user_id: UUID, new_scores: di
         return {"success": False, "message": "CRITICAL: Failed to save rebuilt embedding."}
 
     print(f"Test scores and embedding for {user_id} have been rebuilt and saved.")
-    return {"success": True, "data": embedding_response.data[0]}
+    return {"success": True, "data": await get_full_profile(user_id)}
 
 
 async def generate_master_embedding(profile_data: dict) -> list[float]:
