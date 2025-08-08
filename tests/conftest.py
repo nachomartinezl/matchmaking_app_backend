@@ -60,3 +60,79 @@ def test_user_factory():
     # but we can simulate it for logging purposes.
     for user_id in created_users:
         print(f"DELETED Test User: {user_id}")
+
+
+@pytest.fixture(scope="function")
+def managed_user(client, test_user_factory):
+    """
+    A fixture that creates a user and a corresponding profile, and then
+    cleans up all related database records on teardown.
+    """
+    # 1. ARRANGE: Create a user with the factory
+    user = test_user_factory()
+    user_id = user["id"]
+
+    # 2. ARRANGE: Create a basic profile for them via the API
+    profile_data = {
+        "first_name": "Managed",
+        "last_name": "User",
+        "dob": "1999-01-19",
+        "email": user["email"],
+    }
+    # This POST hits the real DB via the API because we don't mock it here
+    response = client.post("/profiles", json=profile_data)
+    assert response.status_code == 200, f"Failed to create profile for managed user: {response.json()}"
+
+    # 3. YIELD: Provide the user details to the test
+    yield user
+
+    # 4. TEARDOWN: Clean up all database records for this user
+    print(f"\nTEARDOWN: Deleting data for user {user_id}")
+    try:
+        # Use the real supabase client to delete from all relevant tables
+        supabase.table("matches").delete().eq("user_id", user_id).execute()
+        supabase.table("matches").delete().eq("match_id", user_id).execute()
+        supabase.table("questionnaire_responses").delete().eq("user_id", user_id).execute()
+        supabase.table("profiles").delete().eq("id", user_id).execute()
+        print(f"Cleaned up data for user {user_id}")
+    except Exception as e:
+        print(f"Error during teardown for user {user_id}: {e}")
+
+
+@pytest.fixture(scope="function")
+def managed_user_factory(client, test_user_factory):
+    """
+    A factory fixture that creates multiple users with profiles and cleans
+    up all of them on teardown.
+    """
+    created_user_ids = []
+
+    def _create_managed_user():
+        user = test_user_factory()
+        user_id = user["id"]
+
+        profile_data = {
+            "first_name": "FactoryManaged",
+            "last_name": "User",
+            "dob": "1998-01-01",
+            "email": user["email"],
+        }
+        response = client.post("/profiles", json=profile_data)
+        assert response.status_code == 200, f"Failed to create profile for factory user: {response.json()}"
+
+        created_user_ids.append(user_id)
+        return user
+
+    yield _create_managed_user
+
+    # --- Teardown ---
+    print(f"\nTEARDOWN: Deleting data for {len(created_user_ids)} factory-managed users...")
+    for user_id in created_user_ids:
+        try:
+            supabase.table("matches").delete().eq("user_id", user_id).execute()
+            supabase.table("matches").delete().eq("match_id", user_id).execute()
+            supabase.table("questionnaire_responses").delete().eq("user_id", user_id).execute()
+            supabase.table("profiles").delete().eq("id", user_id).execute()
+            print(f"Cleaned up data for user {user_id}")
+        except Exception as e:
+            print(f"Error during teardown for factory user {user_id}: {e}")

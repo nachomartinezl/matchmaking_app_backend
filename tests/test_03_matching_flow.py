@@ -1,34 +1,34 @@
 import pytest
 import time
 
-# A helper function to create a profile and submit a questionnaire for a user
+# A helper function to update a profile and submit a questionnaire for a user
 def setup_user_for_matching(client, user_id, profile_data, questionnaire_submission):
     """A helper to perform the full setup for a single user."""
-    # Create/update their profile with basic info
-    res_put = client.put(f"/profiles/{user_id}", json=profile_data)
-    assert res_put.status_code == 200, f"Failed to put profile for {user_id}: {res_put.json()}"
+    # Update their profile with specific test data
+    # Note: The user and a basic profile are already created by the factory
+    res_patch = client.patch(f"/profiles/{user_id}", json=profile_data)
+    assert res_patch.status_code == 200, f"Failed to patch profile for {user_id}: {res_patch.json()}"
     
     # Have them submit the questionnaire to generate the full embedding
     res_post = client.post("/questionnaires/submit", json=questionnaire_submission)
     assert res_post.status_code == 201, f"Failed to submit questionnaire for {user_id}: {res_post.json()}"
 
-def test_matchmaking_flow(client, test_user_factory):
-    """
-    Tests the entire matchmaking flow by hitting the real database and services.
-    """
-    # 1. ARRANGE: Create three real users in the database via the factory
-    print("\n--- Setting up test users ---")
-    user_a = test_user_factory() # Our main user
-    user_b = test_user_factory() # The ideal match for User A
-    user_c = test_user_factory() # The poor match for User A
 
-    # === THE FIX ===
-    # Add a small delay to ensure the database trigger and any potential
-    # replication lag have fully settled before we proceed with updates.
+def test_matchmaking_flow(client, managed_user_factory):
+    """
+    Tests the entire matchmaking flow using managed users for setup and teardown.
+    """
+    # 1. ARRANGE: Create three managed users using the factory
+    print("\n--- Setting up test users ---")
+    user_a = managed_user_factory() # Our main user
+    user_b = managed_user_factory() # The ideal match for User A
+    user_c = managed_user_factory() # The poor match for User A
+
+    # Add a small delay to ensure database operations settle
     print("Waiting 1 second for database to settle after user creation...")
     time.sleep(1) 
 
-    # 2. SETUP: Define their profiles and questionnaire answers
+    # 2. SETUP: Define their specific profiles and questionnaire answers
     print("--- Defining user profiles and answers ---")
     profile_a = {"gender": "female", "preference": "men", "smoking": "never"}
     submission_a = {
@@ -41,14 +41,14 @@ def test_matchmaking_flow(client, test_user_factory):
     submission_b = {
         "user_id": str(user_b['id']),
         "questionnaire_name": "mbti",
-        "responses": ([0, 1, 0, 1, 0, 1, 0] * 10) # Identical answers to User A for high similarity
+        "responses": ([0, 1, 0, 1, 0, 1, 0] * 10) # Identical answers
     }
     
     profile_c = {"gender": "male", "preference": "women", "smoking": "regularly"}
     submission_c = {
         "user_id": str(user_c['id']),
         "questionnaire_name": "mbti",
-        "responses": ([1, 0, 1, 0, 1, 0, 1] * 10) # Opposite answers for low similarity
+        "responses": ([1, 0, 1, 0, 1, 0, 1] * 10) # Opposite answers
     }
     
     # Set up each user by calling the live API endpoints
@@ -71,17 +71,13 @@ def test_matchmaking_flow(client, test_user_factory):
     response_matches = supabase.table("matches").select("*, match_id(id)").eq("user_id", user_a['id']).execute()
     
     assert response_matches.data, "No matches were created in the database."
-    
-    # We expect two potential matches (B and C are both eligible by preference)
     assert len(response_matches.data) == 2, f"Expected 2 matches, but found {len(response_matches.data)}"
     
-    # Create a simple mapping of match_id to score for easier assertions
     match_scores = {match['match_id']: match['score'] for match in response_matches.data}
 
     assert str(user_b['id']) in match_scores, "User B was not found in the matches."
     assert str(user_c['id']) in match_scores, "User C was not found in the matches."
     
-    # The core assertion: similar user (B) has a higher score than different user (C)
     score_b = match_scores[str(user_b['id'])]
     score_c = match_scores[str(user_c['id'])]
     

@@ -53,20 +53,24 @@ def test_submit_questionnaire(client, test_user_factory):
             "embedding": [0.1] * 128,
         }
 
-        # 4. Implement sequential mocking for get_full_profile
+        # 4. Implement sequential mocking for get_full_profile.
+        # This is a brittle approach, but it allows us to simulate the state of the
+        # profile as it changes across multiple API calls in a single test.
+        # The order of returned values must match the order of `get_full_profile` calls
+        # in the implementation of the API endpoints being tested.
         mock_get_full_profile.side_effect = [
-            initial_profile, # Call inside PUT /profiles
-            initial_profile, # Call inside GET /profiles
-            initial_profile, # Call inside POST /questionnaires/submit
-                profile_after_q, # Call inside profile_service.update_test_scores_and_rebuild_embedding
-                profile_after_q,  # Call inside final GET /profiles
-                profile_after_q
+            initial_profile,  # Called inside PATCH /profiles/{user_id}
+            initial_profile,  # Called inside GET /profiles/{user_id}
+            initial_profile,  # Called inside POST /questionnaires/submit
+            profile_after_q,  # Called inside profile_service.update_test_scores_and_rebuild_embedding
+            profile_after_q,  # Called inside the final GET /profiles/{user_id}
+            profile_after_q
         ]
 
         # --- Test Execution ---
-        # 1. Create the initial profile
-        response_put = client.put(f"/profiles/{user_id}", json=profile_data)
-        assert response_put.status_code == 200
+        # 1. Create/update the initial profile. Use PATCH since PUT is deprecated.
+        response_patch = client.patch(f"/profiles/{user_id}", json=profile_data)
+        assert response_patch.status_code == 200
 
         # 2. Get the initial state
         initial_profile_res = client.get(f"/profiles/{user_id}")
