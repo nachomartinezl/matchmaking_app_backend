@@ -9,6 +9,10 @@ from app.main import app
 async def test_start_profile_success(mocker):
     # Patch DB upsert
     mocker.patch(
+        "app.services.profile_service.get_profile_by_email",
+        return_value=None
+    )
+    mocker.patch(
         "app.services.profile_service.simple_upsert_profile",
         return_value={"id": "1234"}
     )

@@ -39,7 +39,7 @@ async def start_profile(profile_data: ProfileUpdate):
     if not result:
         raise HTTPException(500, "Failed to create profile")
 
-    send_verification_email(email=data["email"], profile_id=profile_id)
+    await send_verification_email(email=data["email"], profile_id=profile_id)
 
     return {"id": str(profile_id)}
 
@@ -77,7 +77,7 @@ async def complete_profile(profile_id: UUID):
     })
 
     if not profile.get("welcome_sent") and profile.get("email_verified"):
-        send_welcome_email(profile["email"], profile.get("first_name", ""))
+        await send_welcome_email(profile["email"], profile.get("first_name", ""))
         await profile_service.simple_upsert_profile({
             "id": str(profile_id),
             "welcome_sent": True
