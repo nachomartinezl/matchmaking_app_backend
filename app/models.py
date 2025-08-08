@@ -34,7 +34,7 @@ class InterestPreference(str, Enum):
     women = "women"
     men = "men"
     both = "both"
-    not_sure = "not sure"
+    not_sure = "not_sure"
 
 class ReligionType(str, Enum):
     atheism = "atheism"
