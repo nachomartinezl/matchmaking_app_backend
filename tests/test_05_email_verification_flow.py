@@ -7,6 +7,15 @@ from app.main import app
 
 @pytest.mark.asyncio
 async def test_verification_email_sent(mocker):
+    # Mock the two database functions that get called
+    mocker.patch(
+        "app.services.profile_service.get_profile_by_email",
+        return_value=None  # Simulate user not existing
+    )
+    mocker.patch(
+        "app.services.profile_service.simple_upsert_profile",
+        return_value={"id": str(uuid.uuid4())}  # Simulate successful insert
+    )
     mock_send_email = mocker.patch(
         "app.services.email_service._send_email",
         return_value=None

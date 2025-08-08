@@ -62,96 +62,75 @@ async def simple_upsert_profile(profile_update_data: dict):
     return response.data[0]
 
 
+async def _rebuild_and_save_embedding(profile_id: UUID) -> bool:
+    """
+    Private helper to rebuild and save a user's embedding.
+    Returns True on success, False on failure.
+    """
+    full_profile = await get_full_profile(profile_id)
+    if not full_profile:
+        print(f"Could not fetch profile for user {profile_id} to rebuild embedding.")
+        return False
+
+    embedding_vector = await generate_master_embedding(full_profile)
+    response = (
+        supabase.table("profiles")
+        .update({"embedding": embedding_vector})
+        .eq("id", str(profile_id))
+        .execute()
+    )
+    if not response.data:
+        print(f"CRITICAL: Failed to save rebuilt embedding for user {profile_id}")
+        return False
+    return True
+
+
 async def upsert_profile_and_rebuild_embedding(
     user_id: UUID, profile_update_data: dict
 ):
     """
-    Upserts profile data, then fetches the full profile to rebuild the master embedding.
-    This is the primary function to call after signup or profile edits.
+    Upserts profile data, then rebuilds the master embedding.
     """
     if not profile_update_data:
-        print("No update data provided.")
         return None
 
     profile_update_data["id"] = str(user_id)
-
-    # 1. Use UPSERT, not UPDATE. This will create if not exists, or update if it does.
     upsert_response = supabase.table("profiles").upsert(profile_update_data).execute()
     if not upsert_response.data:
         print(f"Failed to upsert profile for user {user_id}")
         return None
-    print(f"Profile for {user_id} upserted successfully.")
 
-    # 2. Fetch the complete, updated profile
-    full_profile = await get_full_profile(user_id)
-    if not full_profile:
-        print(f"Could not fetch updated profile for user {user_id}")
-        return None
+    if not await _rebuild_and_save_embedding(user_id):
+        # Even if embedding fails, the profile data was saved.
+        # The return indicates the overall success of the operation.
+        # Depending on requirements, you might want to handle this differently.
+        print(f"Profile data saved, but embedding rebuild failed for {user_id}.")
 
-    # 3. Rebuild the master embedding vector from the full profile
-    embedding_vector = await generate_master_embedding(full_profile)
-
-    # 4. Save the new embedding
-    embedding_response = (
-        supabase.table("profiles")
-        .update({"embedding": embedding_vector})
-        .eq("id", str(user_id))
-        .execute()
-    )
-    if not embedding_response.data:
-        print(f"CRITICAL: Failed to save rebuilt embedding for user {user_id}")
-
-    print(f"Embedding for {user_id} has been rebuilt and saved.")
-
-    # Return the complete, updated profile
     return {"success": True, "data": await get_full_profile(user_id)}
 
 
 async def update_test_scores_and_rebuild_embedding(user_id: UUID, new_scores: dict):
     """
-    Fetches existing scores, merges new scores, saves them, and rebuilds the embedding.
-    This is the primary function to call after a questionnaire is submitted.
+    Merges new test scores, saves them, and rebuilds the embedding.
     """
-    # 1. Fetch the complete, current profile to get existing scores
     full_profile = await get_full_profile(user_id)
     if not full_profile:
-        return {
-            "success": False,
-            "message": f"Could not find profile for user {user_id}",
-        }
+        return {"success": False, "message": f"Profile {user_id} not found."}
 
-    # 2. Merge new scores with existing scores
     existing_scores = full_profile.get("test_scores") or {}
     existing_scores.update(new_scores)
 
-    # 3. Update the 'test_scores' field in the database
-    scores_update_payload = {"test_scores": existing_scores}
     scores_response = (
         supabase.table("profiles")
-        .update(scores_update_payload)
+        .update({"test_scores": existing_scores})
         .eq("id", str(user_id))
         .execute()
     )
     if not scores_response.data:
         return {"success": False, "message": "Failed to save updated test scores."}
 
-    # 4. Rebuild the master embedding with the newly updated scores in the profile
-    # We update the local 'full_profile' object to avoid another DB call
-    full_profile["test_scores"] = existing_scores
-    embedding_vector = await generate_master_embedding(full_profile)
-
-    # 5. Save the new embedding
-    embedding_response = (
-        supabase.table("profiles")
-        .update({"embedding": embedding_vector})
-        .eq("id", str(user_id))
-        .execute()
-    )
-    if not embedding_response.data:
-        return {
-            "success": False,
-            "message": "CRITICAL: Failed to save rebuilt embedding.",
-        }
+    if not await _rebuild_and_save_embedding(user_id):
+        return {"success": False, "message": "Scores saved, but embedding rebuild failed."}
 
     print(f"Test scores and embedding for {user_id} have been rebuilt and saved.")
     return {"success": True, "data": await get_full_profile(user_id)}

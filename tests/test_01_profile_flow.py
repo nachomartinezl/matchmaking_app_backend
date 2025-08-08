@@ -10,6 +10,10 @@ from app.main import app
 async def test_create_profile_and_send_verification_email(mocker):
     # mock DB upsert so we don't hit Supabase
     mocker.patch(
+        "app.services.profile_service.get_profile_by_email",
+        return_value=None
+    )
+    mocker.patch(
         "app.services.profile_service.simple_upsert_profile",
         return_value={"id": str(uuid4())}
     )
