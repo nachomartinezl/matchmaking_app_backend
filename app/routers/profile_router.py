@@ -1,49 +1,93 @@
-from fastapi import APIRouter, HTTPException, Body
-from uuid import UUID
+from fastapi import APIRouter, HTTPException
+from uuid import UUID, uuid4
+from datetime import datetime
 from ..models import ProfileUpdate, ProfileOut
 from ..services import profile_service
+from ..services.email_service import send_verification_email, send_welcome_email
 
 router = APIRouter(prefix="/profiles", tags=["Profiles"])
 
-from datetime import datetime
+# ========== Start signup (lead capture) ==========
+@router.post("", response_model=dict)
+async def start_profile(profile_data: ProfileUpdate):
+    """
+    Create a new lead profile with minimal info: first_name, last_name, dob, email.
+    Generates a UUID independent of Supabase Auth.
+    Sends email verification link.
+    """
+    minimal_required = ["first_name", "last_name", "dob", "email"]
+    data = profile_data.model_dump(mode="json", exclude_unset=True)
 
-@router.get("/{user_id}", response_model=ProfileOut)
-async def get_user_profile(user_id: UUID):
+    # Check required fields
+    missing = [f for f in minimal_required if not data.get(f)]
+    if missing:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Missing required fields: {', '.join(missing)}"
+        )
+
+    profile_id = uuid4()
+    data["id"] = str(profile_id)
+    data["progress"] = 1
+    data["is_complete"] = False
+    data["email_verified"] = False
+
+    # Insert initial row
+    result = await profile_service.simple_upsert_profile(data)
+    if not result:
+        raise HTTPException(500, "Failed to create profile")
+
+    # Send verification email
+    send_verification_email(email=data["email"], profile_id=profile_id)
+
+    return {"id": str(profile_id)}
+
+# ========== Incremental step update ==========
+@router.patch("/{profile_id}", response_model=ProfileOut)
+async def update_profile_step(profile_id: UUID, profile_data: ProfileUpdate):
     """
-    Retrieve a user's complete profile by their unique user ID.
+    Partial update for a profile step.
     """
-    profile = await profile_service.get_full_profile(user_id)
+    update_data = profile_data.model_dump(mode="json", exclude_unset=True)
+    update_data["id"] = str(profile_id)
+
+    result = await profile_service.simple_upsert_profile(update_data)
+    if not result:
+        raise HTTPException(500, "Failed to update profile step")
+
+    return ProfileOut(**result)
+
+# ========== Mark profile complete ==========
+@router.post("/{profile_id}/complete", response_model=ProfileOut)
+async def complete_profile(profile_id: UUID):
+    """
+    Mark profile as complete, send welcome email if verified.
+    """
+    profile = await profile_service.get_full_profile(profile_id)
+    if not profile:
+        raise HTTPException(404, "Profile not found")
+
+    # Update completion status
+    await profile_service.simple_upsert_profile({
+        "id": str(profile_id),
+        "is_complete": True,
+        "completed_at": datetime.utcnow()
+    })
+
+    if not profile.get("welcome_sent") and profile.get("email_verified"):
+        send_welcome_email(profile["email"], profile.get("first_name", ""))
+        await profile_service.simple_upsert_profile({
+            "id": str(profile_id),
+            "welcome_sent": True
+        })
+
+    updated = await profile_service.get_full_profile(profile_id)
+    return ProfileOut(**updated)
+
+# ========== Fetch profile ==========
+@router.get("/{profile_id}", response_model=ProfileOut)
+async def get_user_profile(profile_id: UUID):
+    profile = await profile_service.get_full_profile(profile_id)
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
-
-    # Manually convert string dates to datetime objects
-    if isinstance(profile.get('created_at'), str):
-        profile['created_at'] = datetime.fromisoformat(profile['created_at'])
-    if isinstance(profile.get('updated_at'), str):
-        profile['updated_at'] = datetime.fromisoformat(profile['updated_at'])
-
-    return profile
-
-@router.put("/{user_id}", response_model=ProfileOut)
-async def upsert_user_profile(user_id: UUID, profile_data: ProfileUpdate):
-    """
-    Create or update a user's profile from the signup form or profile edit page.
-    This triggers a full rebuild of the user's embedding vector.
-    """
-    update_data = profile_data.model_dump(mode='json', exclude_unset=True)
-
-    result = await profile_service.upsert_profile_and_rebuild_embedding(
-        user_id, update_data
-    )
-    if not result or not result.get("success"):
-        raise HTTPException(status_code=500, detail="Failed to create or update profile.")
-
-    updated_profile = result["data"]
-
-    # Manually convert string dates to datetime objects
-    if isinstance(updated_profile.get('created_at'), str):
-        updated_profile['created_at'] = datetime.fromisoformat(updated_profile['created_at'])
-    if isinstance(updated_profile.get('updated_at'), str):
-        updated_profile['updated_at'] = datetime.fromisoformat(updated_profile['updated_at'])
-
-    return ProfileOut(**updated_profile)
+    return ProfileOut(**profile)

@@ -8,3 +8,6 @@ numpy
 python-dotenv
 fastapi[all]
 pytest
+requests
+pytest-asyncio
+pytest-mock

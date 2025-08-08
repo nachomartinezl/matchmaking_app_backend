@@ -1,11 +1,20 @@
 from fastapi import FastAPI
-from .routers import profile_router, questionnaire_router, match_router
+from .routers import profile_router, questionnaire_router, match_router, verify_router
+from fastapi.middleware.cors import CORSMiddleware
 
 # Create the main FastAPI application instance
 app = FastAPI(
     title="Matchmaking MVP Backend",
     description="API service for user profiles, dynamic questionnaires, and personality-based matchmaking.",
     version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # add your prod URL later
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # --- Include all the application routers ---
@@ -19,6 +28,8 @@ app.include_router(questionnaire_router.router)
 # Handles running the matchmaking algorithm and managing match status.
 app.include_router(match_router.router)
 
+# Handles email verification
+app.include_router(verify_router.router)
 
 # --- Root Endpoint ---
 

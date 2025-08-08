@@ -28,6 +28,20 @@ async def get_full_profile(user_id: UUID) -> dict | None:
     response = supabase.table("profiles").select("*").eq("id", str(user_id)).single().execute()
     return response.data if response.data else None
 
+async def simple_upsert_profile(profile_update_data: dict):
+    """
+    Upserts profile data without touching embeddings.
+    For lead capture incremental steps.
+    """
+    if not profile_update_data:
+        return None
+
+    response = supabase.table("profiles").upsert(profile_update_data).execute()
+    if not response.data:
+        print("Failed to upsert profile:", profile_update_data.get("id"))
+        return None
+    return response.data[0]
+
 async def upsert_profile_and_rebuild_embedding(user_id: UUID, profile_update_data: dict):
     """
     Upserts profile data, then fetches the full profile to rebuild the master embedding.
