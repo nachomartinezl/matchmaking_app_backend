@@ -173,6 +173,13 @@ class ProfileOut(BaseModel):
     profile_picture_url: Optional[str]
     gallery_urls: Optional[List[str]] = None
 
+    # signup / state flags  ✅ add these
+    email_verified: Optional[bool] = None
+    is_complete: Optional[bool] = None
+    progress: Optional[int] = None
+    welcome_sent: Optional[bool] = None
+    completed_at: Optional[datetime] = None
+
     # ML/meta
     embedding: Optional[List[float]] = None
     test_scores: Optional[dict] = None

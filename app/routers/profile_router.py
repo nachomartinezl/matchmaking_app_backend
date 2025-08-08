@@ -12,13 +12,11 @@ router = APIRouter(prefix="/profiles", tags=["Profiles"])
 async def start_profile(profile_data: ProfileUpdate):
     """
     Create a new lead profile with minimal info: first_name, last_name, dob, email.
-    Generates a UUID independent of Supabase Auth.
-    Sends email verification link.
+    If the email already exists, return its existing profile_id instead of error.
     """
     minimal_required = ["first_name", "last_name", "dob", "email"]
     data = profile_data.model_dump(mode="json", exclude_unset=True)
 
-    # Check required fields
     missing = [f for f in minimal_required if not data.get(f)]
     if missing:
         raise HTTPException(
@@ -26,21 +24,25 @@ async def start_profile(profile_data: ProfileUpdate):
             detail=f"Missing required fields: {', '.join(missing)}"
         )
 
+    # Check if email already exists
+    existing = await profile_service.get_profile_by_email(data["email"])
+    if existing:
+        return {"id": str(existing["id"])}
+
     profile_id = uuid4()
     data["id"] = str(profile_id)
     data["progress"] = 1
     data["is_complete"] = False
     data["email_verified"] = False
 
-    # Insert initial row
     result = await profile_service.simple_upsert_profile(data)
     if not result:
         raise HTTPException(500, "Failed to create profile")
 
-    # Send verification email
     send_verification_email(email=data["email"], profile_id=profile_id)
 
     return {"id": str(profile_id)}
+
 
 # ========== Incremental step update ==========
 @router.patch("/{profile_id}", response_model=ProfileOut)
