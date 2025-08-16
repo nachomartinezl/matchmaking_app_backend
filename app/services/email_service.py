@@ -3,7 +3,7 @@ import os
 import httpx
 import jwt
 from uuid import UUID
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # --- Configuration ---
@@ -19,7 +19,7 @@ RESEND_API_URL = "https://api.resend.com/emails"
 async def send_verification_email(email: str, profile_id: UUID, first_name: str = None):
     """Asynchronously sends a verification email."""
     token = jwt.encode(
-        {"profile_id": str(profile_id), "exp": datetime.utcnow() + timedelta(days=1)},
+        {"profile_id": str(profile_id), "exp": datetime.now(timezone.utc) + timedelta(days=1)},
         EMAIL_VERIFY_SECRET,
         algorithm="HS256",
     )

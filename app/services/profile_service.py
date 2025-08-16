@@ -13,6 +13,13 @@ except FileNotFoundError:
     print("FATAL ERROR: feature_map.json not found. Cannot generate embeddings.")
     FEATURE_MAP = {}
 
+NORMALIZATION_RANGES = {
+    "height_cm": (140, 210),
+    "hexaco": (1, 5),
+    "attachment": (5, 35),
+    "values": (0, 8),
+}
+
 
 # --- Helper Function for Normalization ---
 def normalize(value, min_val, max_val):
@@ -136,70 +143,67 @@ async def update_test_scores_and_rebuild_embedding(user_id: UUID, new_scores: di
     return {"success": True, "data": await get_full_profile(user_id)}
 
 
+def _process_profile_attributes(embedding: np.ndarray, profile_data: dict):
+    """Processes profile attributes and updates the embedding vector."""
+    for key, value in profile_data.items():
+        if value is None:
+            continue
+
+        # Categorical data
+        feature_key = f"profile_{key}_{str(value).lower().replace(' ', '_')}"
+        if feature_key in FEATURE_MAP:
+            embedding[FEATURE_MAP[feature_key]] = 1.0
+
+        # Numerical data
+        feature_key_numeric = f"profile_{key}"
+        if feature_key_numeric in FEATURE_MAP:
+            if key in NORMALIZATION_RANGES:
+                min_val, max_val = NORMALIZATION_RANGES[key]
+                embedding[FEATURE_MAP[feature_key_numeric]] = normalize(value, min_val, max_val)
+
+def _process_test_scores(embedding: np.ndarray, test_scores: dict):
+    """Processes test scores and updates the embedding vector."""
+    if not test_scores:
+        return
+
+    # HEXACO
+    if "Factor Scores" in test_scores:
+        min_val, max_val = NORMALIZATION_RANGES["hexaco"]
+        for factor, score in test_scores["Factor Scores"].items():
+            feature_key = f"test_hexaco_{factor.lower().replace(' ', '-')}"
+            if feature_key in FEATURE_MAP:
+                embedding[FEATURE_MAP[feature_key]] = normalize(score, min_val, max_val)
+
+    # Attachment Styles
+    if "Attachment Style Scores" in test_scores:
+        min_val, max_val = NORMALIZATION_RANGES["attachment"]
+        for style, score in test_scores["Attachment Style Scores"].items():
+            feature_key = f"test_attachment_{style.lower().replace(' ', '-')}"
+            if feature_key in FEATURE_MAP:
+                embedding[FEATURE_MAP[feature_key]] = normalize(score, min_val, max_val)
+
+    # Values
+    if "Values Scores" in test_scores:
+        min_val, max_val = NORMALIZATION_RANGES["values"]
+        for value_name, score in test_scores["Values Scores"].items():
+            feature_key = f"test_values_{value_name.lower()}"
+            if feature_key in FEATURE_MAP:
+                embedding[FEATURE_MAP[feature_key]] = normalize(score, min_val, max_val)
+
+    # MBTI
+    if "MBTI Type" in test_scores:
+        feature_key = f"test_mbti_type_{test_scores['MBTI Type'].lower()}"
+        if feature_key in FEATURE_MAP:
+            embedding[FEATURE_MAP[feature_key]] = 1.0
+
 async def generate_master_embedding(profile_data: dict) -> list[float]:
     """
     Generates the master embedding vector from a user's full profile data
     using the feature_map.json.
     """
     embedding = np.zeros(VECTOR_SIZE, dtype=np.float32)
-
-    # --- 1. Process Profile Attributes (Categorical & Numerical) ---
-    for key, value in profile_data.items():
-        if value is None:
-            continue
-
-        # For categorical data (e.g., gender, smoking), we use one-hot encoding
-        feature_key = f"profile_{key}_{str(value).lower().replace(' ', '_')}"
-        if feature_key in FEATURE_MAP:
-            index = FEATURE_MAP[feature_key]
-            embedding[index] = 1.0
-
-        # For numerical data (e.g., height), we normalize and place the value
-        feature_key_numeric = f"profile_{key}"
-        if feature_key_numeric in FEATURE_MAP:
-            index = FEATURE_MAP[feature_key_numeric]
-            # Example normalization for height (adjust min/max as needed)
-            if key == "height_cm":
-                embedding[index] = normalize(value, 140, 210)
-
-    # --- 2. Process Test Scores from the 'test_scores' JSONB field ---
-    test_scores = profile_data.get("test_scores")
-    if test_scores:
-        # HEXACO
-        if "Factor Scores" in test_scores:
-            for factor, score in test_scores["Factor Scores"].items():
-                feature_key = f"test_hexaco_{factor.lower().replace(' ', '-')}"
-                if feature_key in FEATURE_MAP:
-                    index = FEATURE_MAP[feature_key]
-                    embedding[index] = normalize(
-                        score, 1, 5
-                    )  # Normalize from 1-5 scale
-
-        # Attachment Styles
-        if "Attachment Style Scores" in test_scores:
-            for style, score in test_scores["Attachment Style Scores"].items():
-                feature_key = f"test_attachment_{style.lower().replace(' ', '-')}"
-                if feature_key in FEATURE_MAP:
-                    index = FEATURE_MAP[feature_key]
-                    # Assuming attachment scores are on a 1-7 scale for 5 questions (max 35)
-                    embedding[index] = normalize(score, 5, 35)
-
-        # Values
-        if "Values Scores" in test_scores:
-            for value_name, score in test_scores["Values Scores"].items():
-                feature_key = f"test_values_{value_name.lower()}"
-                if feature_key in FEATURE_MAP:
-                    index = FEATURE_MAP[feature_key]
-                    # Assuming values scores are on a 0-8 scale
-                    embedding[index] = normalize(score, 0, 8)
-
-        # MBTI
-        if "MBTI Type" in test_scores:
-            feature_key = f"test_mbti_type_{test_scores['MBTI Type'].lower()}"
-            if feature_key in FEATURE_MAP:
-                index = FEATURE_MAP[feature_key]
-                embedding[index] = 1.0
-
+    _process_profile_attributes(embedding, profile_data)
+    _process_test_scores(embedding, profile_data.get("test_scores"))
     return embedding.tolist()
 
 

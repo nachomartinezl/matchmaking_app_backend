@@ -4,7 +4,7 @@ from httpx import AsyncClient, ASGITransport
 from uuid import uuid4
 import jwt
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from app.main import app
 from app.services.email_service import EMAIL_VERIFY_SECRET
@@ -13,7 +13,7 @@ from app.services.email_service import EMAIL_VERIFY_SECRET
 def generate_token():
     def _generate_token(profile_id, secret=EMAIL_VERIFY_SECRET, expires_delta_days=1):
         """Generates a JWT token for email verification."""
-        exp = datetime.utcnow() + timedelta(days=expires_delta_days)
+        exp = datetime.now(timezone.utc) + timedelta(days=expires_delta_days)
         payload = {"profile_id": str(profile_id), "exp": exp}
         return jwt.encode(payload, secret, algorithm="HS256")
     return _generate_token
