@@ -17,21 +17,38 @@ def test_submit_questionnaire(client, test_user_factory):
         "preference": "men",
         "height_cm": 170,
         "religion": "atheism",
-        "pets": "none",
+        "pets": ["none"],
         "drinking": "sometimes",
-        "kids": "not_yet",
-        "marital_status": "single",
+        "kids": "not_sure",
         "description": "Just a test user.",
         "profile_picture_url": "https://example.com/profile.jpg"
     }
 
     with patch('app.services.profile_service.get_full_profile') as mock_get_full_profile, \
          patch('app.services.questionnaire_service.supabase') as mock_supabase_in_q_service, \
-         patch('app.services.profile_service.supabase') as mock_supabase_in_p_service:
+         patch('app.services.profile_service.supabase') as mock_supabase_in_p_service, \
+         patch('app.services.profile_service.simple_upsert_profile') as mock_simple_upsert:
 
         # 1. Define a generic successful Supabase response
         mock_db_success = MagicMock()
         mock_db_success.data = [{}] # A non-empty list signifies success to our app code
+
+        # Mock the return value for simple_upsert_profile
+        mock_simple_upsert.return_value = {
+            "id": user_id,
+            **profile_data,
+            "email": "test@example.com",
+            "created_at": "2024-01-01T00:00:00",
+            "updated_at": "2024-01-01T00:00:00",
+            "email_verified": False,
+            "is_complete": False,
+            "progress": 1,
+            "welcome_sent": False,
+            "completed_at": None,
+            "embedding": None,
+            "test_scores": None,
+        }
+
 
         # 2. Configure both mocks to behave identically
         for mock_supabase in [mock_supabase_in_q_service, mock_supabase_in_p_service]:
@@ -42,10 +59,18 @@ def test_submit_questionnaire(client, test_user_factory):
 
         # 3. Define state snapshots
         initial_profile = {
-            "id": user_id, **profile_data,
+            "id": user_id,
+            **profile_data,
+            "email": "test@example.com",
             "embedding": [0.0] * 128,
-            "created_at": "2024-01-01T00:00:00", "updated_at": "2024-01-01T00:00:00",
-            "test_scores": {}
+            "created_at": "2024-01-01T00:00:00",
+            "updated_at": "2024-01-01T00:00:00",
+            "test_scores": {},
+            "email_verified": False,
+            "is_complete": False,
+            "progress": 1,
+            "welcome_sent": False,
+            "completed_at": None,
         }
         profile_after_q = {
             **initial_profile,
@@ -55,7 +80,7 @@ def test_submit_questionnaire(client, test_user_factory):
 
         # 4. Implement sequential mocking for get_full_profile
         mock_get_full_profile.side_effect = [
-            initial_profile, # Call inside PUT /profiles
+            initial_profile, # Call inside PATCH /profiles
             initial_profile, # Call inside GET /profiles
             initial_profile, # Call inside POST /questionnaires/submit
                 profile_after_q, # Call inside profile_service.update_test_scores_and_rebuild_embedding
@@ -65,8 +90,8 @@ def test_submit_questionnaire(client, test_user_factory):
 
         # --- Test Execution ---
         # 1. Create the initial profile
-        response_put = client.put(f"/profiles/{user_id}", json=profile_data)
-        assert response_put.status_code == 200
+        response_patch = client.patch(f"/profiles/{user_id}", json=profile_data)
+        assert response_patch.status_code == 200
 
         # 2. Get the initial state
         initial_profile_res = client.get(f"/profiles/{user_id}")

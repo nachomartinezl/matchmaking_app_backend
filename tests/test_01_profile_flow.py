@@ -58,7 +58,7 @@ async def test_update_profile_full_data(mocker):
         "preference": "men",
         "height_cm": 170,  # derived from 5'7"
         "religion": "atheism",
-        "pets": "none",
+        "pets": ["none"],
         "smoking": "never",
         "drinking": "sometimes",
         "kids": "not_sure",
@@ -95,7 +95,7 @@ async def test_update_profile_full_data(mocker):
         "height_feet": 5,
         "height_inches": 7,
         "religion": "atheism",
-        "pets": "none",
+        "pets": ["none"],
         "drinking": "sometimes",
         "kids": "not_sure",
         "description": "Just a test user.",

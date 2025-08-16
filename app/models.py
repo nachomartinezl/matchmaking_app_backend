@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, model_validator, field_validator
+from pydantic import BaseModel, EmailStr, Field, model_validator, field_validator, ConfigDict
 from typing import List, Optional, Annotated
 from uuid import UUID
 from enum import Enum
@@ -206,8 +206,7 @@ class ProfileOut(BaseModel):
             object.__setattr__(self, "height_inches", i)
         return self
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # ===================================================================
 # Original Models for other application features
@@ -229,8 +228,7 @@ class OptionOut(BaseModel):
     option_text: str
     position: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class QuestionOut(BaseModel):
     id: UUID
@@ -238,8 +236,7 @@ class QuestionOut(BaseModel):
     position: int
     options: List[OptionOut]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class QuestionnaireOut(BaseModel):
     id: UUID
@@ -247,5 +244,4 @@ class QuestionnaireOut(BaseModel):
     name: str
     questions: List[QuestionOut]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

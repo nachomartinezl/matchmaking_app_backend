@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 from ..models import ProfileUpdate, ProfileOut
 from ..services import profile_service
 from ..services.email_service import send_verification_email, send_welcome_email
@@ -15,7 +15,7 @@ async def start_profile(profile_data: ProfileUpdate):
     If the email already exists, return its existing profile_id instead of error.
     """
     minimal_required = ["first_name", "last_name", "dob", "email"]
-    data = profile_data.model_dump(mode="json", exclude_unset=True)
+    data = profile_data.model_dump(exclude_unset=True)
 
     missing = [f for f in minimal_required if not data.get(f)]
     if missing:
@@ -50,7 +50,7 @@ async def update_profile_step(profile_id: UUID, profile_data: ProfileUpdate):
     """
     Partial update for a profile step.
     """
-    update_data = profile_data.model_dump(mode="json", exclude_unset=True)
+    update_data = profile_data.model_dump(exclude_unset=True)
     update_data["id"] = str(profile_id)
 
     result = await profile_service.simple_upsert_profile(update_data)
@@ -69,19 +69,17 @@ async def complete_profile(profile_id: UUID):
     if not profile:
         raise HTTPException(404, "Profile not found")
 
-    # Update completion status
-    await profile_service.simple_upsert_profile({
+    update_data = {
         "id": str(profile_id),
         "is_complete": True,
-        "completed_at": datetime.utcnow()
-    })
+        "completed_at": datetime.now(timezone.utc)
+    }
 
     if not profile.get("welcome_sent") and profile.get("email_verified"):
         await send_welcome_email(profile["email"], profile.get("first_name", ""))
-        await profile_service.simple_upsert_profile({
-            "id": str(profile_id),
-            "welcome_sent": True
-        })
+        update_data["welcome_sent"] = True
+
+    await profile_service.simple_upsert_profile(update_data)
 
     updated = await profile_service.get_full_profile(profile_id)
     return ProfileOut(**updated)

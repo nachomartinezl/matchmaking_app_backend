@@ -1,5 +1,16 @@
 import numpy as np
 from ..models import QuestionnaireSubmit
+from ._constants import (
+    HEXACO_NUM_RESPONSES,
+    HEXACO_REVERSE_KEY_VALUE,
+    MBTI_NUM_RESPONSES,
+    MBTI_E_I_THRESHOLD,
+    MBTI_S_N_THRESHOLD,
+    MBTI_T_F_THRESHOLD,
+    MBTI_J_P_THRESHOLD,
+    ATTACHMENT_STYLES_NUM_RESPONSES,
+    SCHWARTZ_VALUES_NUM_RESPONSES,
+)
 
 # --- Paste all four of your calculation functions here ---
 def calculate_hexaco_scores(responses):
@@ -17,12 +28,12 @@ def calculate_hexaco_scores(responses):
         ValueError: If the responses list does not contain exactly 60 items.
     """
     # Validate input length
-    if len(responses) != 60:
-        raise ValueError("Responses list must contain exactly 60 items.")
+    if len(responses) != HEXACO_NUM_RESPONSES:
+        raise ValueError(f"Responses list must contain exactly {HEXACO_NUM_RESPONSES} items.")
 
     def reverse_key(value):
         # Reverse the response key for certain items
-        return 6 - value
+        return HEXACO_REVERSE_KEY_VALUE - value
 
     # Define scoring keys for HEXACO
     scoring_keys = {
@@ -90,8 +101,8 @@ def calculate_mbti_scores(responses):
     # NOTE: Your function expects responses from 1-5, but the frontend might send 0/1.
     # We will adjust this in the main service. For now, let's assume it works with 0/1.
     # A simple mapping: 0 -> "A" choice, 1 -> "B" choice
-    if len(responses) != 70:
-        raise ValueError("Responses list must contain exactly 70 items.")
+    if len(responses) != MBTI_NUM_RESPONSES:
+        raise ValueError(f"Responses list must contain exactly {MBTI_NUM_RESPONSES} items.")
     
     scoring_keys = {
         'E-I': [0, 7, 14, 21, 28, 35, 42, 49, 56, 63],
@@ -101,10 +112,10 @@ def calculate_mbti_scores(responses):
     }
     
     mbti_type = ""
-    mbti_type += "E" if sum(1 for i in scoring_keys['E-I'] if responses[i] == 0) > 5 else "I"
-    mbti_type += "S" if sum(1 for i in scoring_keys['S-N'] if responses[i] == 0) > 10 else "N"
-    mbti_type += "T" if sum(1 for i in scoring_keys['T-F'] if responses[i] == 0) > 10 else "F"
-    mbti_type += "J" if sum(1 for i in scoring_keys['J-P'] if responses[i] == 0) > 10 else "P"
+    mbti_type += "E" if sum(1 for i in scoring_keys['E-I'] if responses[i] == 0) > MBTI_E_I_THRESHOLD else "I"
+    mbti_type += "S" if sum(1 for i in scoring_keys['S-N'] if responses[i] == 0) > MBTI_S_N_THRESHOLD else "N"
+    mbti_type += "T" if sum(1 for i in scoring_keys['T-F'] if responses[i] == 0) > MBTI_T_F_THRESHOLD else "F"
+    mbti_type += "J" if sum(1 for i in scoring_keys['J-P'] if responses[i] == 0) > MBTI_J_P_THRESHOLD else "P"
 
     return {'MBTI Type': mbti_type}
     
@@ -123,8 +134,8 @@ def calculate_attachment_style_scores(responses):
         ValueError: If the responses list does not contain exactly 20 items.
     """
     # Validate input length
-    if len(responses) != 20:
-        raise ValueError("Responses list must contain exactly 20 items.")
+    if len(responses) != ATTACHMENT_STYLES_NUM_RESPONSES:
+        raise ValueError(f"Responses list must contain exactly {ATTACHMENT_STYLES_NUM_RESPONSES} items.")
 
     # Define scoring keys for attachment styles
     scoring_keys = {
@@ -157,8 +168,8 @@ def calculate_values_scores(responses):
         ValueError: If the responses list does not contain exactly 10 items.
     """
     # Validate input length
-    if len(responses) != 10:
-        raise ValueError("Responses list must contain exactly 10 items.")
+    if len(responses) != SCHWARTZ_VALUES_NUM_RESPONSES:
+        raise ValueError(f"Responses list must contain exactly {SCHWARTZ_VALUES_NUM_RESPONSES} items.")
 
     # Define Schwartz values
     values = [
@@ -173,7 +184,14 @@ def calculate_values_scores(responses):
 
 
 # --- Create a master dispatcher function ---
-def calculate_scores_from_submission(submission: QuestionnaireSubmit) -> dict:
+SCORING_DISPATCHER = {
+    'hexaco': calculate_hexaco_scores,
+    'mbti': calculate_mbti_scores,
+    'attachment_styles': calculate_attachment_style_scores,
+    'schwartz_survey': calculate_values_scores,
+}
+
+def calculate_scores_from_submission(submission: QuestionnaireSubmit) -> dict | None:
     """
     Dispatcher function that calls the correct scoring algorithm
     based on the questionnaire name.
@@ -181,15 +199,9 @@ def calculate_scores_from_submission(submission: QuestionnaireSubmit) -> dict:
     name = submission.questionnaire
     responses = submission.responses
 
-    if name == 'hexaco':
-        return calculate_hexaco_scores(responses)
-    elif name == 'mbti':
-        # Your MBTI test has 2 options per question. The frontend will send [0, 1, 0, 0...].
-        return calculate_mbti_scores(responses)
-    elif name == 'attachment_styles':
-        return calculate_attachment_style_scores(responses)
-    elif name == 'schwartz_survey':
-        return calculate_values_scores(responses)
+    scoring_function = SCORING_DISPATCHER.get(name)
+    if scoring_function:
+        return scoring_function(responses)
     else:
         print(f"Warning: No specific scoring logic found for questionnaire '{name}'.")
         return None
