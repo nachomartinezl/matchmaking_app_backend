@@ -81,6 +81,8 @@ class RelationshipGoal(str, Enum):
     relationship = "relationship"
     not_sure = "not_sure"
 
+PetsList = Annotated[List[PetsPreference], Field(min_length=1, max_length=8)]
+
 # ===================================================================
 # Profile Models (for the public.profiles table)
 # ===================================================================
@@ -105,7 +107,7 @@ class ProfileUpdate(BaseModel):
 
     # lifestyle
     religion: Optional["ReligionType"] = None
-    pets: Optional["PetsPreference"] = None
+    pets: Optional[PetsList] = None
     smoking: Optional["SmokingHabit"] = None
     drinking: Optional["DrinkingHabit"] = None
     kids: Optional["KidsStatus"] = None
@@ -140,6 +142,15 @@ class ProfileUpdate(BaseModel):
         # if v and v.upper() not in ISO_CODES: raise ValueError("Invalid ISO country code")
         # return v.upper() if v else v
 
+    @field_validator("pets")
+    @classmethod
+    def pets_none_exclusive(cls, v):
+        if not v:
+            return v
+        if PetsPreference.none in v and len(v) > 1:
+            raise ValueError("'none' cannot be combined with other pets")
+        return v
+
 class ProfileOut(BaseModel):
     id: UUID
 
@@ -161,7 +172,7 @@ class ProfileOut(BaseModel):
 
     # lifestyle
     religion: Optional["ReligionType"]
-    pets: Optional["PetsPreference"]
+    pets: Optional[List[PetsPreference]]
     smoking: Optional["SmokingHabit"]
     drinking: Optional["DrinkingHabit"]
     kids: Optional["KidsStatus"]
