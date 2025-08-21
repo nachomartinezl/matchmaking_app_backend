@@ -15,7 +15,7 @@ async def start_profile(profile_data: ProfileUpdate):
     If the email already exists, return its existing profile_id instead of error.
     """
     minimal_required = ["first_name", "last_name", "dob", "email"]
-    data = profile_data.model_dump(exclude_unset=True)
+    data = profile_data.model_dump(exclude_unset=True, mode="json")
 
     missing = [f for f in minimal_required if not data.get(f)]
     if missing:
@@ -50,7 +50,7 @@ async def update_profile_step(profile_id: UUID, profile_data: ProfileUpdate):
     """
     Partial update for a profile step.
     """
-    update_data = profile_data.model_dump(exclude_unset=True)
+    update_data = profile_data.model_dump(exclude_unset=True, mode="json")
     update_data["id"] = str(profile_id)
 
     result = await profile_service.simple_upsert_profile(update_data)

@@ -2,7 +2,8 @@ import json
 import numpy as np
 from uuid import UUID
 from ..database import supabase
-from datetime import datetime
+from fastapi.encoders import jsonable_encoder
+from datetime import date, datetime
 
 # --- Configuration ---
 VECTOR_SIZE = 128
@@ -58,11 +59,14 @@ async def simple_upsert_profile(profile_update_data: dict):
     if not profile_update_data:
         return None
 
-    response = (
-        supabase.table("profiles")
-        .upsert(serialize_dates(profile_update_data))
-        .execute()
+    payload = jsonable_encoder(
+        profile_update_data,
+        custom_encoder={
+            date: lambda d: d.isoformat(),
+            datetime: lambda dt: dt.isoformat(),
+        },
     )
+    response = supabase.table("profiles").upsert(payload).execute()
     if not response.data:
         print("Failed to upsert profile:", profile_update_data.get("id"))
         return None
@@ -137,7 +141,10 @@ async def update_test_scores_and_rebuild_embedding(user_id: UUID, new_scores: di
         return {"success": False, "message": "Failed to save updated test scores."}
 
     if not await _rebuild_and_save_embedding(user_id):
-        return {"success": False, "message": "Scores saved, but embedding rebuild failed."}
+        return {
+            "success": False,
+            "message": "Scores saved, but embedding rebuild failed.",
+        }
 
     print(f"Test scores and embedding for {user_id} have been rebuilt and saved.")
     return {"success": True, "data": await get_full_profile(user_id)}
@@ -159,7 +166,10 @@ def _process_profile_attributes(embedding: np.ndarray, profile_data: dict):
         if feature_key_numeric in FEATURE_MAP:
             if key in NORMALIZATION_RANGES:
                 min_val, max_val = NORMALIZATION_RANGES[key]
-                embedding[FEATURE_MAP[feature_key_numeric]] = normalize(value, min_val, max_val)
+                embedding[FEATURE_MAP[feature_key_numeric]] = normalize(
+                    value, min_val, max_val
+                )
+
 
 def _process_test_scores(embedding: np.ndarray, test_scores: dict):
     """Processes test scores and updates the embedding vector."""
@@ -195,6 +205,7 @@ def _process_test_scores(embedding: np.ndarray, test_scores: dict):
         feature_key = f"test_mbti_type_{test_scores['MBTI Type'].lower()}"
         if feature_key in FEATURE_MAP:
             embedding[FEATURE_MAP[feature_key]] = 1.0
+
 
 async def generate_master_embedding(profile_data: dict) -> list[float]:
     """
