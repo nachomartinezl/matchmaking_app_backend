@@ -62,3 +62,28 @@ async def test_start_profile_missing_fields():
 
     assert resp.status_code == 400
     assert "Missing required fields" in resp.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_start_profile_email_exists(mocker):
+    # Patch DB check to simulate email already existing
+    mocker.patch(
+        "app.services.profile_service.get_profile_by_email",
+        return_value={"id": "some-uuid", "email": "jane@example.com"}
+    )
+
+    payload = {
+        "first_name": "Jane",
+        "last_name": "Doe",
+        "dob": "1995-05-01",
+        "email": "jane@example.com"
+    }
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test"
+    ) as ac:
+        resp = await ac.post("/profiles", json=payload)
+
+    assert resp.status_code == 409
+    assert "a profile with this email already exists" in resp.json()["detail"].lower()

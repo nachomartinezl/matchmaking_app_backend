@@ -12,7 +12,7 @@ router = APIRouter(prefix="/profiles", tags=["Profiles"])
 async def start_profile(profile_data: ProfileUpdate):
     """
     Create a new lead profile with minimal info: first_name, last_name, dob, email.
-    If the email already exists, return its existing profile_id instead of error.
+    If the email already exists, raises a 409 Conflict error.
     """
     minimal_required = ["first_name", "last_name", "dob", "email"]
     data = profile_data.model_dump(exclude_unset=True, mode="json")
@@ -27,7 +27,10 @@ async def start_profile(profile_data: ProfileUpdate):
     # Check if email already exists
     existing = await profile_service.get_profile_by_email(data["email"])
     if existing:
-        return {"id": str(existing["id"])}
+        raise HTTPException(
+            status_code=409,
+            detail="A profile with this email already exists."
+        )
 
     profile_id = uuid4()
     data["id"] = str(profile_id)
