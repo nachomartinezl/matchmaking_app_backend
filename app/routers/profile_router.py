@@ -8,43 +8,69 @@ from ..services.email_service import send_verification_email, send_welcome_email
 router = APIRouter(prefix="/profiles", tags=["Profiles"])
 
 # ========== Start signup (lead capture) ==========
+# In your profiles router file (e.g., routers/profiles.py)
+
 @router.post("", response_model=dict)
 async def start_profile(profile_data: ProfileUpdate):
     """
-    Create a new lead profile with minimal info: first_name, last_name, dob, email.
-    If the email already exists, raises a 409 Conflict error.
+    Creates a new profile or intelligently handles an existing one.
+    - If email does not exist: Creates a new profile and sends verification.
+    - If email exists on an INCOMPLETE & UNVERIFIED profile: Updates info, re-sends verification.
+    - If email exists on an INCOMPLETE & VERIFIED profile: Returns existing ID to fast-track user.
+    - If email exists on a COMPLETE profile: Raises a 409 Conflict error.
     """
     minimal_required = ["first_name", "last_name", "dob", "email"]
-    data = profile_data.model_dump(exclude_unset=True, mode="json")
+    data = profile_data.model_dump(exclude_unset=True)
 
     missing = [f for f in minimal_required if not data.get(f)]
     if missing:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Missing required fields: {', '.join(missing)}"
-        )
+        raise HTTPException(status_code=400, detail=f"Missing required fields: {', '.join(missing)}")
 
-    # Check if email already exists
     existing = await profile_service.get_profile_by_email(data["email"])
+    
     if existing:
-        raise HTTPException(
-            status_code=409,
-            detail="A profile with this email already exists."
-        )
+        # Case 1: Profile is complete and active. Block this.
+        if existing.get("is_complete"):
+            raise HTTPException(
+                status_code=409,
+                detail="A profile with this email already exists."
+            )
+        
+        profile_id = existing["id"]
+        
+        # Case 2: Profile is incomplete but already verified. Fast-track them.
+        if existing.get("email_verified"):
+            # Don't send an email. Just return the ID so the frontend can proceed.
+            return {"id": str(profile_id), "status": "verified_resume"}
 
+        # Case 3: Profile is incomplete and NOT verified. Treat as a resume/retry.
+        update_payload = {
+            "id": str(profile_id),
+            "first_name": data["first_name"],
+            "last_name": data["last_name"],
+            "dob": data["dob"]
+        }
+        await profile_service.simple_upsert_profile(update_payload)
+        
+        # Re-send verification email.
+        await send_verification_email(email=data["email"], profile_id=profile_id)
+        
+        return {"id": str(profile_id), "status": "unverified_resume"}
+
+    # Case 4: Email is brand new. Create a new profile.
     profile_id = uuid4()
     data["id"] = str(profile_id)
-    data["progress"] = 1
     data["is_complete"] = False
     data["email_verified"] = False
+    # I removed `progress=1` as it seems less relevant in a single-submit model
 
     result = await profile_service.simple_upsert_profile(data)
     if not result:
-        raise HTTPException(500, "Failed to create profile")
+        raise HTTPException(status_code=500, detail="Failed to create profile")
 
     await send_verification_email(email=data["email"], profile_id=profile_id)
 
-    return {"id": str(profile_id)}
+    return {"id": str(profile_id), "status": "new_profile"}
 
 
 # ========== Incremental step update ==========
