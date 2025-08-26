@@ -23,10 +23,11 @@ app.add_middleware(
 app.include_router(profile_router.router)
 
 # Handles fetching questionnaires and submitting user answers.
-app.include_router(questionnaire_router.router)
+#app.include_router(questionnaire_router.router)
 
 # Handles running the matchmaking algorithm and managing match status.
-app.include_router(match_router.router)
+
+#app.include_router(match_router.router)
 
 # Handles email verification
 app.include_router(verify_router.router)
