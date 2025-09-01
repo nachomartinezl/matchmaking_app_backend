@@ -6,12 +6,15 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(
     title="Matchmaking MVP Backend",
     description="API service for user profiles, dynamic questionnaires, and personality-based matchmaking.",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # add your prod URL later
+    allow_origins=[
+        "http://localhost:3000",
+        "https://matchmaking-app-nine.vercel.app/",
+    ],  # add your prod URL later
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -23,16 +26,17 @@ app.add_middleware(
 app.include_router(profile_router.router)
 
 # Handles fetching questionnaires and submitting user answers.
-#app.include_router(questionnaire_router.router)
+# app.include_router(questionnaire_router.router)
 
 # Handles running the matchmaking algorithm and managing match status.
 
-#app.include_router(match_router.router)
+# app.include_router(match_router.router)
 
 # Handles email verification
 app.include_router(verify_router.router)
 
 # --- Root Endpoint ---
+
 
 @app.get("/", tags=["Root"])
 async def read_root():
