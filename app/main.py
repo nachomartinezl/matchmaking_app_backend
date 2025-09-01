@@ -13,7 +13,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "https://matchmaking-app-nine.vercel.app/",
+        "https://matchmaking-app-nine.vercel.app",
     ],  # add your prod URL later
     allow_credentials=True,
     allow_methods=["*"],
